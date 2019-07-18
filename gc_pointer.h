@@ -106,15 +106,26 @@ Pointer<T,size>::Pointer(T *t){
         atexit(shutdown);
     first = false;
 
+   	typename std::list<PtrDetails<T> >::iterator p;
+   	p->memPtr = t;
+   	t = this->addr;
+
+   	PtrDetails<T> p2 (t, 0);
+   	p2.memPtr = t;
+    p2.isArray = false;
+    refContainer.push_back(p2);
+
+
     // TODO: Implement Pointer constructor
     // Lab: Smart Pointer Project Lab
-    addr = t;
+
+    /*addr = t;
     this->isArray = false;
     this->arraySize = 0;
     if(size > 1){
         this->isArray = true;
         this->arraySize = size;
-    }
+    }*/
 
 }
 // Copy constructor.
@@ -123,6 +134,18 @@ Pointer<T,size>::Pointer(const Pointer &ob){
 
     // TODO: Implement Pointer constructor
     // Lab: Smart Pointer Project Lab
+    typename std::list<PtrDetails<T> >::iterator p;
+    p = findPtrInfo(ob.addr);
+
+    p->refcount++;
+
+    this->addr = ob.addr;
+    this->isArray = ob.isArray;
+    this->arraySize = ob.arraySize;
+
+
+
+
 
 }
 
@@ -180,28 +203,39 @@ bool Pointer<T, size>::collect(){
 template <class T, int size>
 T *Pointer<T, size>::operator=(T *t){
 
-    
-    // LAB: Smart Pointer Project Lab
+	typename std::list<PtrDetails<T> >::iterator q;
+    q = findPtrInfo(addr);
+    if (q->refcount) {
+        q->refcount--;
+    }
 
-    this->addr = t;
-    delete t;
-    return this->addr;
+    PtrDetails<T> p (t, 0);
+    p.memPtr = t;
+    p.isArray = false;
+    refContainer.push_back(p);
+    addr = t;
+    isArray = false;
+    arraySize = 0;
+
+    return addr;
 
 }
 // Overload assignment of Pointer to Pointer.
 template <class T, int size>
 Pointer<T, size> &Pointer<T, size>::operator=(Pointer &rv){
-    typename std::list<PtrDetails<T> >::iterator p;
     
+    typename std::list<PtrDetails<T> >::iterator p;
+
     // First, decrement the reference count
     // for the memory currently being pointed to.
+    p = findPtrInfo(addr);
     p->refcount--;
-    // Then, ncrement the reference count of
+    // Next, increment the reference count of
     // the new address.
-    rv->refcount++;
-    // increment ref count
-    // store the address.
-    p.memPtr = rv.memPtr;
+    p = findPtrInfo(rv.addr);
+    p->refcount++;  // increment ref count
+    addr = rv.addr; // store the address.
+
     delete rv;
 
 }
