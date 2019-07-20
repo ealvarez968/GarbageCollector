@@ -8,7 +8,7 @@
     Pointer implements a pointer type that uses
     garbage collection to release unused memory.
     A Pointer must only be used to point to memory
-    that was dynamically allocated using new.
+    that was dynamically allocated using new.()
     When used to refer to an allocated array,
     specify the array size.
 */
@@ -106,26 +106,15 @@ Pointer<T,size>::Pointer(T *t){
         atexit(shutdown);
     first = false;
 
-   	typename std::list<PtrDetails<T> >::iterator p;
-   	p->memPtr = t;
-   	t = this->addr;
+    PtrDetails<T> p (t, 0);
+    p.memPtr = t;
+    p.isArray = false;
 
-   	PtrDetails<T> p2 (t, 0);
-   	p2.memPtr = t;
-    p2.isArray = false;
-    refContainer.push_back(p2);
+    refContainer.push_back(p);
 
-
-    // TODO: Implement Pointer constructor
-    // Lab: Smart Pointer Project Lab
-
-    /*addr = t;
-    this->isArray = false;
-    this->arraySize = 0;
-    if(size > 1){
-        this->isArray = true;
-        this->arraySize = size;
-    }*/
+    addr = t;
+    isArray = false;
+    arraySize = 0;
 
 }
 // Copy constructor.
